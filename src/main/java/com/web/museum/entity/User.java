@@ -56,10 +56,24 @@ public class User {
             })
     @JsonIgnore
     private List<Work> listWorks;
+
+    @OneToMany(mappedBy = "user",
+            fetch = FetchType.LAZY,
+            cascade = {
+                    CascadeType.PERSIST, CascadeType.MERGE,
+                    CascadeType.DETACH, CascadeType.REFRESH
+            })
+    @JsonIgnore
+    private List<Story> listStories;
+
+
     @PreRemove
     private void preRemove() {
         for (Work work : listWorks) {
             work.setUser(null);
+        }
+        for (Story story : listStories) {
+            story.setUser(null);
         }
     }
 

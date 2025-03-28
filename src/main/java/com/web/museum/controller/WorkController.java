@@ -1,6 +1,7 @@
 package com.web.museum.controller;
 
 import com.web.museum.dto.PagedResponse;
+import com.web.museum.dto.WorkInfoDTO;
 import com.web.museum.dto.WorkResponseDTO;
 import com.web.museum.entity.Work;
 import com.web.museum.service.WorkService;
@@ -18,13 +19,13 @@ public class WorkController {
     private WorkService workService;
     
     @GetMapping
-    public ResponseEntity<PagedResponse<WorkResponseDTO>> getAllWorks(
+    public ResponseEntity<PagedResponse<WorkInfoDTO>> getAllWorks(
             @RequestParam int page,
             @RequestParam int size ){
         Pageable pageable = PageRequest.of(page, size);
-        Page<WorkResponseDTO> works = workService.getAllWorks(pageable);
+        Page<WorkInfoDTO> works = workService.getAllWorks(pageable);
 
-        PagedResponse<WorkResponseDTO> response = new PagedResponse<>(
+        PagedResponse<WorkInfoDTO> response = new PagedResponse<>(
                 works.getContent(),
                 works.getNumber(),
                 works.getSize(),

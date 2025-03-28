@@ -5,6 +5,7 @@ import com.web.museum.dao.UserRepository;
 import com.web.museum.dao.WorkRepository;
 import com.web.museum.dto.AuthorInfoDTO;
 import com.web.museum.dto.UserInfoDTO;
+import com.web.museum.dto.WorkInfoDTO;
 import com.web.museum.dto.WorkResponseDTO;
 import com.web.museum.entity.Author;
 import com.web.museum.entity.User;
@@ -28,9 +29,9 @@ public class WorkServiceImpl implements WorkService{
     private UserRepository userRepository;
 
     @Override
-    public Page<WorkResponseDTO> getAllWorks(Pageable pageable) {
+    public Page<WorkInfoDTO> getAllWorks(Pageable pageable) {
         Page<Work> works = workRepository.findAll(pageable);
-        return works.map(this::convertToDTO);
+        return works.map(this::convertToInfoDTO);
     }
 
     @Override
@@ -50,8 +51,7 @@ public class WorkServiceImpl implements WorkService{
     @Override
     @Transactional
     public WorkResponseDTO updateWork(int id, Work reqWork) {
-        System.out.println("_________________________________________");
-        System.out.println("request user" + reqWork.getUser());
+
         Optional<Work> workOptional = workRepository.findById(id);
         if (workOptional.isEmpty()) {
             throw new RuntimeException("Work not found");
@@ -164,6 +164,31 @@ public class WorkServiceImpl implements WorkService{
         WorkResponseDTO.setAuthor(authorInfoDTO);
 
         return WorkResponseDTO;
+    }
+
+    private WorkInfoDTO convertToInfoDTO(Work work) {
+        WorkInfoDTO WorkInfoDTO = new WorkInfoDTO();
+        WorkInfoDTO.setId(work.getId());
+        WorkInfoDTO.setTitle(work.getTitle());
+        WorkInfoDTO.setViews(work.getViews());
+        WorkInfoDTO.setSaves(work.getSaves());
+
+        AuthorInfoDTO authorInfoDTO = new AuthorInfoDTO();
+        authorInfoDTO.setId(work.getAuthor().getId());
+        authorInfoDTO.setName(work.getAuthor().getName());
+        if(work.getUser() != null){
+            UserInfoDTO userInfoDTO = new UserInfoDTO();
+            userInfoDTO.setId(work.getUser().getId());
+            userInfoDTO.setFullname(work.getUser().getFullname());
+            WorkInfoDTO.setUser(userInfoDTO);
+        }
+        else {
+            WorkInfoDTO.setUser(null);
+        }
+
+        WorkInfoDTO.setAuthor(authorInfoDTO);
+
+        return WorkInfoDTO;
     }
 
 }
