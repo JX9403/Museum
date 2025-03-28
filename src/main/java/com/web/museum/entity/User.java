@@ -75,6 +75,7 @@ public class User {
         for (Story story : listStories) {
             story.setUser(null);
         }
+
     }
 
     @OneToMany(mappedBy = "user",

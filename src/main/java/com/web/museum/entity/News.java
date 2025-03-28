@@ -20,6 +20,9 @@ public class News {
 
     @Column(name = "content", columnDefinition = "LONGTEXT")
     private String content;
+    private String writer;
+    @Column( columnDefinition = "LONGTEXT")
+    private String description;
     private int views;
     private int saves;
     @CreationTimestamp
@@ -27,12 +30,6 @@ public class News {
 
     @UpdateTimestamp
     private LocalDateTime updated;
-    @ManyToOne(cascade = {
-            CascadeType.PERSIST, CascadeType.MERGE,
-            CascadeType.DETACH, CascadeType.REFRESH
-    })
-    @JoinColumn(name = "user_id")
-    private User user;
 
     @OneToMany(
             mappedBy = "news",
