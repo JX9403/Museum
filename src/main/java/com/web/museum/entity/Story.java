@@ -1,6 +1,7 @@
 package com.web.museum.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.web.museum.util.StatusType;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
@@ -36,6 +37,11 @@ public class Story {
     )
     @JoinColumn(name = "author_id")
     private Author author;
+
+    @Enumerated(EnumType.STRING)
+    private StatusType status;
+
+
 
     @ManyToOne(
             cascade = {

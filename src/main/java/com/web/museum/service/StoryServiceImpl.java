@@ -65,6 +65,11 @@ public class StoryServiceImpl implements StoryService{
         if (reqStory.getContent() == null || reqStory.getContent().isEmpty()) {
             throw new RuntimeException("Content cannot be empty");
         }
+
+        if (reqStory.getStatus() == null) {
+            throw new RuntimeException("Status cannot be empty");
+        }
+
         if (reqStory.getAuthor() == null) {
             throw new RuntimeException("Valid Author ID is required");
         }
@@ -89,6 +94,7 @@ public class StoryServiceImpl implements StoryService{
         story.setTitle(reqStory.getTitle());
         story.setContent(reqStory.getContent());
         story.setAuthor(authorOptional.get());
+        story.setStatus(reqStory.getStatus());
 
         Story updatedStory = storyRepository.save(story);
         return convertToDTO(updatedStory);
@@ -120,6 +126,9 @@ public class StoryServiceImpl implements StoryService{
         if (reqStory.getAuthor() == null || reqStory.getAuthor().getId() == 0) {
             throw new RuntimeException("Valid Author ID is required");
         }
+        if (reqStory.getStatus() == null) {
+            throw new RuntimeException("Status cannot be empty");
+        }
 
         // Tìm Author trong database trước khi gán vào Story
         Optional<Author> authorOptional = authorRepository.findById(reqStory.getAuthor().getId());
@@ -149,6 +158,7 @@ public class StoryServiceImpl implements StoryService{
         StoryResponseDTO.setId(story.getId());
         StoryResponseDTO.setTitle(story.getTitle());
         StoryResponseDTO.setContent(story.getContent());
+        StoryResponseDTO.setStatus(story.getStatus());
         AuthorInfoDTO authorInfoDTO = new AuthorInfoDTO();
         authorInfoDTO.setId(story.getAuthor().getId());
         authorInfoDTO.setName(story.getAuthor().getName());
@@ -173,7 +183,7 @@ public class StoryServiceImpl implements StoryService{
         StoryInfoDTO.setTitle(story.getTitle());
         StoryInfoDTO.setViews(story.getViews());
         StoryInfoDTO.setSaves(story.getSaves());
-
+        StoryInfoDTO.setStatus(story.getStatus());
         AuthorInfoDTO authorInfoDTO = new AuthorInfoDTO();
         authorInfoDTO.setId(story.getAuthor().getId());
         authorInfoDTO.setName(story.getAuthor().getName());

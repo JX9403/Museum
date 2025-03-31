@@ -1,6 +1,8 @@
 package com.web.museum.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.web.museum.util.AuthorType;
+import com.web.museum.util.StatusType;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
@@ -27,6 +29,9 @@ public class Work {
 
     @UpdateTimestamp
     private LocalDateTime updated;
+
+    @Enumerated(EnumType.STRING) // Lưu kiểu chuỗi (POET, WRITER)
+    private StatusType status; // Kiểu tác giả
 
     private int views;
     private int saves;

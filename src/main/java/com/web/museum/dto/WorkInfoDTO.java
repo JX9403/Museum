@@ -1,5 +1,6 @@
 package com.web.museum.dto;
 
+import com.web.museum.util.StatusType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,6 +15,7 @@ public class WorkInfoDTO {
     private String title;
     private AuthorInfoDTO author;
     private UserInfoDTO user;
+    private StatusType status;
     private int views;
     private int saves;
 

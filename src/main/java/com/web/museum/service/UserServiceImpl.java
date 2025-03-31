@@ -11,9 +11,15 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -26,8 +32,13 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private RoleRepository roleRepository;
 
-//    @Autowired
-//    private BCryptPasswordEncoder passwordEncoder;
+    @Override
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
     @Override
     public Page<UserResponseDTO> getAllUsers(Pageable pageable) {
@@ -66,7 +77,7 @@ public class UserServiceImpl implements UserService {
         user.setFullname(reqUser.getFullname());
         user.setEmail(reqUser.getEmail());
         user.setPassword(reqUser.getPassword());
-//        user.setPassword(passwordEncoder.encode(reqUser.getPassword()));
+        user.setPassword(passwordEncoder.encode(reqUser.getPassword()));
 
         List<Role> validRoles = new ArrayList<>();
         if (reqUser.getListRoles() != null && !reqUser.getListRoles().isEmpty()) {
@@ -148,5 +159,19 @@ public class UserServiceImpl implements UserService {
 
         userResponseDTO.setRoles(roleResponseDTOs);
         return userResponseDTO;
+    }
+
+//    Security
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepository.findByEmail(username);
+        if(user == null){
+            throw new RuntimeException("Tai khoan khong ton tai!");
+        }
+        return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), rolesToAuthorities(user.getListRoles()));
+    }
+
+    private Collection<? extends GrantedAuthority> rolesToAuthorities(Collection<Role> roles){
+        return roles.stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList());
     }
 }

@@ -1,5 +1,8 @@
 package com.web.museum.dto;
 
+import com.web.museum.util.StatusType;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,5 +19,7 @@ public class StoryInfoDTO {
     private UserInfoDTO user;
     private int views;
     private int saves;
+
+    private StatusType status;
 
 }

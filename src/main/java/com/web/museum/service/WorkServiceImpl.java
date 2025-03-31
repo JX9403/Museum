@@ -67,6 +67,9 @@ public class WorkServiceImpl implements WorkService{
         if (reqWork.getAuthor() == null) {
             throw new RuntimeException("Valid Author ID is required");
         }
+        if (reqWork.getStatus() == null ) {
+            throw new RuntimeException("Status cannot be empty");
+        }
 
         // Lấy Author từ database
         Optional<Author> authorOptional = authorRepository.findById(reqWork.getAuthor().getId());
@@ -88,6 +91,7 @@ public class WorkServiceImpl implements WorkService{
         work.setTitle(reqWork.getTitle());
         work.setContent(reqWork.getContent());
         work.setAuthor(authorOptional.get());
+        work.setStatus(reqWork.getStatus());
 
         Work updatedWork = workRepository.save(work);
         return convertToDTO(updatedWork);
@@ -118,6 +122,10 @@ public class WorkServiceImpl implements WorkService{
         }
         if (reqWork.getAuthor() == null || reqWork.getAuthor().getId() == 0) {
             throw new RuntimeException("Valid Author ID is required");
+        }
+
+        if (reqWork.getStatus() == null ) {
+            throw new RuntimeException("Status cannot be empty");
         }
 
         // Tìm Author trong database trước khi gán vào Work
@@ -151,6 +159,7 @@ public class WorkServiceImpl implements WorkService{
         AuthorInfoDTO authorInfoDTO = new AuthorInfoDTO();
         authorInfoDTO.setId(work.getAuthor().getId());
         authorInfoDTO.setName(work.getAuthor().getName());
+        WorkResponseDTO.setStatus(work.getStatus());
         if(work.getUser() != null){
             UserInfoDTO userInfoDTO = new UserInfoDTO();
             userInfoDTO.setId(work.getUser().getId());
@@ -172,6 +181,7 @@ public class WorkServiceImpl implements WorkService{
         WorkInfoDTO.setTitle(work.getTitle());
         WorkInfoDTO.setViews(work.getViews());
         WorkInfoDTO.setSaves(work.getSaves());
+        WorkInfoDTO.setStatus(work.getStatus());
 
         AuthorInfoDTO authorInfoDTO = new AuthorInfoDTO();
         authorInfoDTO.setId(work.getAuthor().getId());
@@ -181,6 +191,8 @@ public class WorkServiceImpl implements WorkService{
             userInfoDTO.setId(work.getUser().getId());
             userInfoDTO.setFullname(work.getUser().getFullname());
             WorkInfoDTO.setUser(userInfoDTO);
+
+
         }
         else {
             WorkInfoDTO.setUser(null);

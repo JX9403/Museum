@@ -6,8 +6,9 @@ import com.web.museum.dto.UserResponseDTO;
 import com.web.museum.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
-public interface UserService {
+public interface UserService extends UserDetailsService {
     Page<UserResponseDTO> getAllUsers(Pageable pageable);
 
     UserResponseDTO getUserById(int id) ;
@@ -17,4 +18,6 @@ public interface UserService {
     UserResponseDTO updateUser ( int id, User user);
 
     void deleteUser ( int id );
+
+    User findByEmail(String email);
 }
