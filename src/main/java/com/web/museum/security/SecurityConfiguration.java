@@ -32,11 +32,11 @@ public class SecurityConfiguration {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
         http.authorizeHttpRequests(
                 configurer -> configurer
-//                        .anyRequest().permitAll()
-                        .requestMatchers(HttpMethod.GET, EndPoints.PUBLIC_GET_ENDPOINTS).permitAll()
-                        .requestMatchers(HttpMethod.POST, EndPoints.PUBLIC_POST_ENDPOINTS).permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/users").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/users").hasAuthority("ADMIN")
+                        .anyRequest().permitAll()
+//                        .requestMatchers(HttpMethod.GET, EndPoints.PUBLIC_GET_ENDPOINTS).permitAll()
+//                        .requestMatchers(HttpMethod.POST, EndPoints.PUBLIC_POST_ENDPOINTS).permitAll()
+//                        .requestMatchers(HttpMethod.GET, "/api/users").hasAuthority("ADMIN")
+//                        .requestMatchers(HttpMethod.POST, "/api/users").hasAuthority("ADMIN")
 
         );
 

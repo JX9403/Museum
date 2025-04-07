@@ -1,5 +1,6 @@
 package com.web.museum.dto;
 
+import com.web.museum.entity.Image;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,4 +21,5 @@ public class AuthorResponseDTO {
     private String career;
     private String type;
     private List<AchievementInfoDTO> listAchievements;
+    private List<ImageInfoDTO> listImages;
 }

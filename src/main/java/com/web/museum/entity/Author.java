@@ -14,7 +14,7 @@ import java.util.List;
 @Entity
 @Data
 @Table(name = "authors")
-@JsonIgnoreProperties({"listWorks", "listStories", "listImages"})
+@JsonIgnoreProperties({"listWorks", "listStories"})
 public class Author {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -58,6 +58,11 @@ public class Author {
             inverseJoinColumns = @JoinColumn(name = "achievement_id")
     )
     private List<Achievement> listAchievements;
+
+    @PreRemove
+    private void preRemove() {
+        this.listAchievements.clear(); // Clear liên kết trước khi xóa
+    }
 
     @OneToMany(
             mappedBy = "author",

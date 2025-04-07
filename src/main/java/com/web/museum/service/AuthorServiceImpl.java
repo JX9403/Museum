@@ -5,9 +5,11 @@ import com.web.museum.dao.AuthorRepository;
 import com.web.museum.dao.ImageRepository;
 import com.web.museum.dto.AchievementInfoDTO;
 import com.web.museum.dto.AuthorResponseDTO;
+import com.web.museum.dto.ImageInfoDTO;
 import com.web.museum.entity.Achievement;
 import com.web.museum.entity.Author;
 import com.web.museum.entity.Image;
+import com.web.museum.util.AuthorType;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -31,9 +33,19 @@ public class AuthorServiceImpl implements AuthorService {
 
 
     @Override
-    public Page<AuthorResponseDTO> getAllAuthors(Pageable pageable) {
-        Page<Author> authors = authorRepository.findAll(pageable);
-      return authors.map(this::convertToDTO) ;
+    public Page<AuthorResponseDTO> getAllAuthors(String name, String type, String sort, Pageable pageable) {
+        AuthorType authorType = null;
+        if (type != null && !type.isBlank()) {
+            authorType = AuthorType.valueOf(type.toUpperCase());
+        }
+
+        Page<Author> authors = authorRepository.searchAuthors(
+                name == null || name.isBlank() ? null : name,
+                authorType,
+                pageable
+        );
+
+        return authors.map(this::convertToDTO);
     }
 
     @Override
@@ -80,18 +92,31 @@ public class AuthorServiceImpl implements AuthorService {
             author.setListAchievements(new ArrayList<>()); // Khởi tạo danh sách rỗng nếu không có giải thưởng
         }
 
+        // Thêm danh sách hình ảnh nếu có
+        List<Image> images = reqAuthor.getListImages();
+        if (images != null && !images.isEmpty()) {
+            for (Image img : images) {
+                img.setAuthor(author);
+            }
+            author.setListImages(images);
+        } else {
+            author.setListImages(new ArrayList<>());
+        }
+
         Author savedAuthor = authorRepository.save(author);
-return  convertToDTO(savedAuthor);
+        return  convertToDTO(savedAuthor);
     }
 
     @Override
     @Transactional
     public AuthorResponseDTO updateAuthor(int id, Author reqAuthor) {
-        Optional<Author> authorOptional  = authorRepository.findById(id);
-        if(authorOptional.isEmpty()) {
+        Optional<Author> authorOptional = authorRepository.findById(id);
+        if (authorOptional.isEmpty()) {
             throw new RuntimeException("Author not found");
         }
         Author author = authorOptional.get();
+
+        // Kiểm tra các trường dữ liệu của tác giả
         if (reqAuthor.getName() == null || reqAuthor.getName().isEmpty()) {
             throw new RuntimeException("Name is required");
         }
@@ -101,10 +126,11 @@ return  convertToDTO(savedAuthor);
         if (reqAuthor.getBiography() == null || reqAuthor.getBiography().isEmpty()) {
             throw new RuntimeException("Biography is required");
         }
-        if (reqAuthor.getType() == null ) {
+        if (reqAuthor.getType() == null) {
             throw new RuntimeException("AuthorType is required");
         }
 
+        // Cập nhật thông tin cơ bản của tác giả
         author.setName(reqAuthor.getName());
         author.setBirthYear(reqAuthor.getBirthYear());
         author.setDeathYear(reqAuthor.getDeathYear());
@@ -112,13 +138,24 @@ return  convertToDTO(savedAuthor);
         author.setCareer(reqAuthor.getCareer());
         author.setType(reqAuthor.getType());
 
-        if(reqAuthor.getListImages() != null){
-            author.setListImages((reqAuthor.getListImages()));
+        // Cập nhật danh sách ảnh
+        if (reqAuthor.getListImages() != null) {
+            // Lặp qua danh sách ảnh và kiểm tra URL ảnh
+            List<Image> validImages = new ArrayList<>();
+            for (Image image : reqAuthor.getListImages()) {
+                if (image.getUrl() != null && !image.getUrl().isEmpty()) {
+                    // Nếu URL hợp lệ, gắn thêm authorId vào ảnh
+                    image.setAuthor(author); // Gắn đúng authorId vào ảnh
+                    validImages.add(image);
+                }
+            }
+            // Cập nhật danh sách ảnh cho tác giả
+            author.setListImages(validImages);
         }
 
-        // Kiểm tra và thay thế danh sách giải thưởng
+        // Cập nhật danh sách giải thưởng
         List<Achievement> achievements = reqAuthor.getListAchievements();
-        if(achievements != null) {
+        if (achievements != null) {
             List<Achievement> updatedAchievements = new ArrayList<>();
             for (Achievement achievement : achievements) {
                 Optional<Achievement> existAchievement = achievementRepository.findById(achievement.getId());
@@ -131,9 +168,14 @@ return  convertToDTO(savedAuthor);
 
             author.setListAchievements(updatedAchievements);
         }
+
+        // Lưu thông tin tác giả đã được cập nhật
         authorRepository.save(author);
-        return convertToDTO(author) ;
+
+        // Trả về AuthorResponseDTO đã chuyển đổi từ đối tượng Author
+        return convertToDTO(author);
     }
+
 
     @Override
     @Transactional
@@ -157,6 +199,7 @@ return  convertToDTO(savedAuthor);
         authorResponseDTO.setCareer(author.getCareer());
         authorResponseDTO.setType(author.getType().toString());
 
+        // Ánh xạ giải thưởng
         List<AchievementInfoDTO> achievementInfoDTOs = author.getListAchievements().stream()
                 .map(achievement -> {
                     AchievementInfoDTO achievementInfoDTO = new AchievementInfoDTO();
@@ -165,8 +208,20 @@ return  convertToDTO(savedAuthor);
                     return achievementInfoDTO;
                 })
                 .collect(Collectors.toList());
-
         authorResponseDTO.setListAchievements(achievementInfoDTOs);
+
+        // Ánh xạ danh sách ảnh
+        List<ImageInfoDTO> imageInfoDTOS = author.getListImages().stream()
+                .map(image -> {
+                    ImageInfoDTO imageDTO = new ImageInfoDTO();
+                    imageDTO.setUrl(image.getUrl());
+                    imageDTO.setDescription(image.getDescription());
+                    return imageDTO;
+                })
+                .collect(Collectors.toList());
+        authorResponseDTO.setListImages(imageInfoDTOS);
+
         return authorResponseDTO;
     }
+
 }

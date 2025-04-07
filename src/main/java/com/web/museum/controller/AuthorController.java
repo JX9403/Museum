@@ -10,6 +10,7 @@ import org.springframework.data.annotation.Reference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,10 +23,18 @@ public class AuthorController {
     @GetMapping
     public ResponseEntity<PagedResponse<AuthorResponseDTO>> getAllAuthors(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size
-    ){
-        Pageable pageable = PageRequest.of(page, size);
-        Page<AuthorResponseDTO> authors = authorService.getAllAuthors(pageable);
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String type,
+            @RequestParam(defaultValue = "asc") String sort
+    ) {
+        Sort sortBy = sort.equalsIgnoreCase("desc") ?
+                Sort.by("name").descending() :
+                Sort.by("name").ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sortBy);
+
+        Page<AuthorResponseDTO> authors = authorService.getAllAuthors(name, type, sort, pageable);
 
         PagedResponse<AuthorResponseDTO> response = new PagedResponse<>(
                 authors.getContent(),
@@ -34,8 +43,10 @@ public class AuthorController {
                 authors.getTotalElements(),
                 authors.getTotalPages()
         );
-                return ResponseEntity.ok(response);
+
+        return ResponseEntity.ok(response);
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<AuthorResponseDTO> getAuthorById(@PathVariable  int id){
